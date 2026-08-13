@@ -12,19 +12,22 @@ Vercel 的 `npx skills` 负责安装。skilldoctor 负责判断该不该留。
 
 ## Install / 安装
 
-From a clone (works now) / 从源码（现在就能用）：
+```bash
+npx --yes github:xyiqq/skilldoctor --help
+npx --yes github:xyiqq/skilldoctor lint .
+npx --yes github:xyiqq/skilldoctor audit .
+npx --yes github:xyiqq/skilldoctor compat .
+npx --yes github:xyiqq/skilldoctor ci .
+```
+
+From a clone / 从源码：
 
 ```bash
+git clone https://github.com/xyiqq/skilldoctor.git
+cd skilldoctor
 npm install
 npm run build
 node dist/cli.js --help
-```
-
-After the package is published to npm / 发布到 npm 之后：
-
-```bash
-npm install -g skilldoctor
-npx skilldoctor --help
 ```
 
 Requires Node.js 18.18 or newer.
@@ -32,12 +35,12 @@ Requires Node.js 18.18 or newer.
 ## Commands / 命令
 
 ```bash
-skilldoctor lint ./my-skill      # agentskills.io spec
-skilldoctor audit ./my-skill     # injection, secrets, unconstrained tools
-skilldoctor compat ./my-skill    # Claude / Cursor / Codex / OpenCode
-skilldoctor ci ./my-skill        # lint + audit + compat
-skilldoctor scan                 # installed skills under ~/.cursor, ~/.codex, ...
-skilldoctor init pdf-processing  # scaffold a valid skill
+npx --yes github:xyiqq/skilldoctor lint ./my-skill
+npx --yes github:xyiqq/skilldoctor audit ./my-skill
+npx --yes github:xyiqq/skilldoctor compat ./my-skill
+npx --yes github:xyiqq/skilldoctor ci ./my-skill
+npx --yes github:xyiqq/skilldoctor scan
+npx --yes github:xyiqq/skilldoctor init pdf-processing
 ```
 
 `scan` is also available as `skilldoctor doctor`.
@@ -91,14 +94,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
-      - run: npm run build
-      - run: node dist/cli.js ci .
+      - uses: xyiqq/skilldoctor@v0.1.0
+        with:
+          path: .
+          fail-on: error
 ```
 
-After npm publish, consumers can `npm install -g skilldoctor` and run `skilldoctor ci .`. This repository also ships `action.yml` (`dist/action.js`) so a tagged release can be used as `uses: xyiqq/skilldoctor@v0.1.0`.
+Or run the CLI from this repository / 或者直接跑本仓库 CLI：
 
-发布到 npm 之后，别人可以 `npm install -g skilldoctor` 再跑 `skilldoctor ci .`。本仓库带 `action.yml`（入口 `dist/action.js`），打 tag 后可以写成 `uses: xyiqq/skilldoctor@v0.1.0`。
+```yaml
+      - run: npx --yes github:xyiqq/skilldoctor ci .
+```
 
 ## What it checks / 检查什么
 
