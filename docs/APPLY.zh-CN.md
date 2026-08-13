@@ -50,7 +50,7 @@ I am the primary maintainer of skilldoctor (https://github.com/xyiqq/skilldoctor
 API credits will fund maintainer automation only: expand audit/compat rules from real-world skills, generate fixtures, draft PR reviews and release notes, triage issues, and run Codex on community PRs. Every model output is human-reviewed before merge. Credits will not be used for a commercial product.
 ```
 
-**Anything else we should know?**（312 字符）
+**Anything else we should know?**（237 字符，上限 500）
 
 ```text
 Public repo, MIT, CI green, first release v0.1.0. Install: npx --yes github:xyiqq/skilldoctor. Next step is a Codex-powered PR review workflow on this repo. I want this to be a reference gate for safe Agent Skills in the Codex ecosystem.
