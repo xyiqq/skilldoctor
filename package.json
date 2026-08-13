@@ -1,0 +1,64 @@
+{
+  "name": "skilldoctor",
+  "version": "0.1.0",
+  "description": "Quality gate for Agent Skills: lint, security audit, and cross-agent compatibility checks.",
+  "type": "module",
+  "bin": {
+    "skilldoctor": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "ci": "npm run typecheck && npm run test && npm run build",
+    "prepublishOnly": "npm run ci"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "keywords": [
+    "agent-skills",
+    "skill.md",
+    "cli",
+    "lint",
+    "audit",
+    "codex",
+    "claude-code",
+    "cursor",
+    "opencode",
+    "github-action"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xyiqq/skilldoctor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xyiqq/skilldoctor/issues"
+  },
+  "homepage": "https://github.com/xyiqq/skilldoctor#readme",
+  "dependencies": {
+    "commander": "^14.0.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

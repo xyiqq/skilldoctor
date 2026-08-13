@@ -1,0 +1,27 @@
+name: skilldoctor
+description: Lint, audit, and compatibility-check Agent Skills (SKILL.md) in a repository.
+author: skilldoctor contributors
+branding:
+  icon: shield
+  color: purple
+inputs:
+  path:
+    description: Skill directory or repository root to scan
+    required: false
+    default: "."
+  fail-on:
+    description: Fail the job on error, warning, or never
+    required: false
+    default: error
+outputs:
+  errors:
+    description: Number of error findings
+  warnings:
+    description: Number of warning findings
+  skills:
+    description: Number of skills scanned
+  ok:
+    description: Whether the scan passed
+runs:
+  using: node20
+  main: dist/action.js
