@@ -39,6 +39,7 @@ Stable identifiers. Command flags and file paths stay in English.
 | `audit/self-modify` | warning | Skill tells the agent to rewrite itself |
 | `audit/obfuscated-code` | warning | Dynamic decode or `eval` in `scripts/` |
 | `audit/dangerous-script` | error | Recursive delete or download-and-execute |
+| `audit/insecure-http` | warning | Downloads or installs over plain HTTP |
 
 ## compat
 

@@ -41,6 +41,9 @@ export function formatReport(report: Report, options: CliOptions): string {
   if (options.format === "sarif") {
     return formatSarif(report);
   }
+  if (options.format === "markdown") {
+    return formatMarkdown(report);
+  }
   if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
     return "";
   }
@@ -106,6 +109,50 @@ function formatExtra(skill: SkillReport): string[] {
     return [`location ${skill.extra.location}`];
   }
   return [];
+}
+
+export function formatMarkdown(report: Report): string {
+  const lines = [
+    `## skilldoctor ${report.command}`,
+    "",
+    `| Skills | Errors | Warnings | Info |`,
+    `| --- | --- | --- | --- |`,
+    `| ${report.summary.skills} | ${report.summary.errors} | ${report.summary.warnings} | ${report.summary.info} |`,
+    "",
+  ];
+  if (report.skills.length === 0) {
+    lines.push("No `SKILL.md` files found.");
+    lines.push("");
+    return `${lines.join("\n")}\n`;
+  }
+  for (const skill of report.skills) {
+    const mark = skill.findings.some((item) => item.severity === "error") ? "✖" : "✔";
+    lines.push(`### ${mark} ${skill.name}`);
+    lines.push("");
+    lines.push(`\`${skill.path}\``);
+    lines.push("");
+    if (skill.findings.length === 0) {
+      lines.push("No findings.");
+      lines.push("");
+      continue;
+    }
+    lines.push(`| Severity | Rule | Location | Message |`);
+    lines.push(`| --- | --- | --- | --- |`);
+    for (const finding of skill.findings) {
+      const where = finding.file
+        ? `${finding.file}${finding.line ? `:${finding.line}` : ""}`
+        : "-";
+      lines.push(
+        `| ${finding.severity} | \`${finding.rule}\` | \`${where}\` | ${escapeMd(finding.message)} |`,
+      );
+    }
+    lines.push("");
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+function escapeMd(value: string): string {
+  return value.replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
 
 export function countBySeverity(findings: Finding[]): { errors: number; warnings: number; info: number } {

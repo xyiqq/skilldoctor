@@ -7,13 +7,13 @@ export interface FixResult {
   changes: string[];
 }
 
-export function runFix(inputPath: string, ignore: string[] = []): FixResult[] {
+export function runFix(inputPath: string, ignore: string[] = [], dryRun = false): FixResult[] {
   const skills = discoverSkills(inputPath, 8, ignore);
   const results: FixResult[] = [];
   for (const skill of skills) {
     const { next, changes } = fixSkillText(skill);
     if (changes.length === 0 || next === skill.raw) continue;
-    writeFileSync(skill.skillMdPath, next, "utf8");
+    if (!dryRun) writeFileSync(skill.skillMdPath, next, "utf8");
     results.push({ path: skill.skillMdPath, changes });
   }
   return results;

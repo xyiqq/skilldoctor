@@ -44,6 +44,8 @@ npx --yes github:xyiqq/skilldoctor init pdf-processing
 npx --yes github:xyiqq/skilldoctor rules
 npx --yes github:xyiqq/skilldoctor explain lint/name-invalid
 npx --yes github:xyiqq/skilldoctor fix ./my-skill
+npx --yes github:xyiqq/skilldoctor fix ./my-skill --dry-run
+npx --yes github:xyiqq/skilldoctor score ./my-skill
 ```
 
 `scan` is also available as `skilldoctor doctor`.
@@ -56,14 +58,16 @@ npx --yes github:xyiqq/skilldoctor fix ./my-skill
 
 | Flag | Values | Default |
 |---|---|---|
-| `--format` | `human`, `json`, `sarif` | `human` |
-| `--fail-on` | `error`, `warning`, `never` | `error` |
+| `--format` | `human`, `json`, `sarif`, `markdown` | `human` |
+| `--fail-on` | `error`, `warning`, `never`, or `score:<n>` for `score` | `error` |
 | `--ignore` | glob or path prefix, repeatable | none |
 | `--quiet` |  | off |
+| `--dry-run` | with `fix` only | off |
 
 ```bash
 skilldoctor ci . --format json --fail-on warning
-skilldoctor ci . --ignore examples --format sarif
+skilldoctor ci . --ignore examples --format markdown
+skilldoctor score . --fail-on score:80
 ```
 
 Optional config files in the repo root / 仓库根目录可选配置：

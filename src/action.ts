@@ -38,6 +38,6 @@ function parseFailOn(value: string | undefined): FailOn {
 }
 
 function parseFormat(value: string | undefined): Format {
-  if (value === "json" || value === "sarif" || value === "human") return value;
+  if (value === "json" || value === "sarif" || value === "markdown" || value === "human") return value;
   return "human";
 }

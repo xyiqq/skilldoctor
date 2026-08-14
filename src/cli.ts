@@ -9,6 +9,7 @@ import { loadFileConfig, mergeIgnore, type FileConfig } from "./config.js";
 import { runFix } from "./fix.js";
 import { emitGitHubAnnotations } from "./github.js";
 import { formatReport, shouldFail } from "./report.js";
+import { formatScoreReport, runScore } from "./score.js";
 import type { CliOptions, FailOn, Format, Report } from "./types.js";
 
 const program = new Command();
@@ -28,7 +29,7 @@ program
   .command("scan")
   .alias("doctor")
   .description("Scan skills installed for local agents")
-  .option("--format <format>", "human, json, or sarif", "human")
+  .option("--format <format>", "human, json, sarif, or markdown", "human")
   .option("--fail-on <level>", "error, warning, or never", "error")
   .option("--quiet", "print nothing on success", false)
   .action((opts) => {
@@ -72,19 +73,60 @@ program
   .description("Apply safe auto-fixes: quote numeric metadata, POSIX paths, trailing newline")
   .argument("[path]", "skill directory or repository root", ".")
   .option("--ignore <pattern>", "skip matching skill paths (repeatable)", collectIgnore, [])
+  .option("--dry-run", "show fixes without writing files", false)
   .action((path: string, opts: Record<string, unknown>) => {
     const fileConfig = loadFileConfig(path);
     const cliIgnore = Array.isArray(opts.ignore)
       ? opts.ignore.filter((item): item is string => typeof item === "string")
       : [];
-    const results = runFix(path, mergeIgnore(fileConfig.ignore, cliIgnore));
+    const dryRun = Boolean(opts.dryRun);
+    const results = runFix(path, mergeIgnore(fileConfig.ignore, cliIgnore), dryRun);
     if (results.length === 0) {
       process.stdout.write("No auto-fixes applied.\n");
       return;
     }
+    if (dryRun) process.stdout.write("Dry run — no files written.\n");
     for (const result of results) {
       process.stdout.write(`${result.path}\n  ${result.changes.join("\n  ")}\n`);
     }
+  });
+
+program
+  .command("score")
+  .description("Score skills from 0-100 with letter grades")
+  .argument("[path]", "skill directory or repository root", ".")
+  .option("--ignore <pattern>", "skip matching skill paths (repeatable)", collectIgnore, [])
+  .option("--format <format>", "human or json", "human")
+  .option("--fail-on <level>", "error, warning, never, or score:<n>", "error")
+  .action((path: string, opts: Record<string, unknown>) => {
+    const fileConfig = loadFileConfig(path);
+    const cliIgnore = Array.isArray(opts.ignore)
+      ? opts.ignore.filter((item): item is string => typeof item === "string")
+      : [];
+    const ignore = mergeIgnore(fileConfig.ignore, cliIgnore);
+    const report = runScore(path, ignore);
+    const format = opts.format === "json" ? "json" : "human";
+    if (format === "json") {
+      process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+    } else {
+      process.stdout.write(formatScoreReport(report));
+    }
+    if (report.skills.length === 0) {
+      process.exitCode = 1;
+      return;
+    }
+    const failOn = typeof opts.failOn === "string" ? opts.failOn : "error";
+    if (failOn.startsWith("score:")) {
+      const min = Number(failOn.slice("score:".length));
+      if (Number.isFinite(min) && report.average < min) process.exitCode = 1;
+      return;
+    }
+    if (failOn === "never") return;
+    if (failOn === "warning" && report.skills.some((skill) => skill.warnings > 0 || skill.errors > 0)) {
+      process.exitCode = 1;
+      return;
+    }
+    if (report.skills.some((skill) => skill.errors > 0)) process.exitCode = 1;
   });
 
 program.parse();
@@ -97,7 +139,7 @@ function addPathCommand(
   command
     .description(description)
     .argument("[path]", "skill directory or repository root", ".")
-    .option("--format <format>", "human, json, or sarif", "human")
+    .option("--format <format>", "human, json, sarif, or markdown", "human")
     .option("--fail-on <level>", "error, warning, or never", "error")
     .option("--ignore <pattern>", "skip matching skill paths (repeatable)", collectIgnore, [])
     .option("--quiet", "print nothing on success", false)
@@ -124,7 +166,7 @@ function readOptions(opts: Record<string, unknown>, fileConfig: FileConfig = { i
     ? opts.ignore.filter((item): item is string => typeof item === "string")
     : [];
   return {
-    format: format === "json" || format === "sarif" ? format : "human",
+    format,
     failOn,
     quiet: Boolean(opts.quiet),
     ignore: mergeIgnore(fileConfig.ignore, cliIgnore),
@@ -132,7 +174,7 @@ function readOptions(opts: Record<string, unknown>, fileConfig: FileConfig = { i
 }
 
 function parseFormat(value: unknown): Format {
-  if (value === "json" || value === "sarif" || value === "human") return value;
+  if (value === "json" || value === "sarif" || value === "markdown" || value === "human") return value;
   return "human";
 }
 
