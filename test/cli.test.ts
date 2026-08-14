@@ -13,7 +13,7 @@ describe("cli helpers", () => {
 
   it("emits JSON reports", () => {
     const report = runLint(join(process.cwd(), "test/fixtures/valid-minimal"));
-    const json = JSON.parse(formatReport(report, { format: "json", failOn: "error", quiet: false }));
+    const json = JSON.parse(formatReport(report, { format: "json", failOn: "error", quiet: false, ignore: [] }));
     expect(json.command).toBe("lint");
     expect(json.ok).toBe(true);
   });

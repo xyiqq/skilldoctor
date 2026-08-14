@@ -31,6 +31,7 @@ export const RULE_CATALOG = [
     { id: "compat/context-fork", severity: "warning", summary: "context: fork is Claude-only" },
     { id: "compat/allowed-tools-support", severity: "info", summary: "allowed-tools is experimental" },
     { id: "scan/duplicate-name", severity: "warning", summary: "same skill name installed in multiple agent directories" },
+    { id: "scan/windows-symlink", severity: "warning", summary: "skill is installed as a symlink on Windows" },
 ];
 export function formatRuleCatalog() {
     const width = Math.max(...RULE_CATALOG.map((rule) => rule.id.length));

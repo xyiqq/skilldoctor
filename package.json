@@ -1,6 +1,6 @@
 {
   "name": "skilldoctor",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Quality gate for Agent Skills: lint, security audit, and cross-agent compatibility checks.",
   "type": "module",
   "bin": {
