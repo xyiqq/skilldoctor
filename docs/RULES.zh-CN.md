@@ -53,3 +53,4 @@
 | ID | 级别 | 含义 |
 |---|---|---|
 | `scan/duplicate-name` | warning | 同一个 Skill 名安装在多个 Agent 目录 |
+| `scan/windows-symlink` | warning | Windows 上通过符号链接安装 Skill |

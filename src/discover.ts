@@ -50,9 +50,9 @@ export const HOME_SKILL_ROOTS = [
   ".copilot/skills",
 ];
 
-export function discoverSkills(inputPath: string, maxDepth = 8): SkillDocument[] {
+export function discoverSkills(inputPath: string, maxDepth = 8, ignore: string[] = []): SkillDocument[] {
   const target = resolve(inputPath);
-  const skillFiles = findSkillMdFiles(target, maxDepth);
+  const skillFiles = findSkillMdFiles(target, maxDepth).filter((file) => !isIgnored(target, file, ignore));
   return skillFiles.map((file) => loadSkill(file));
 }
 
@@ -177,4 +177,27 @@ function toPosix(value: string): string {
 
 function isTestFixtureDir(parentDir: string, entryName: string): boolean {
   return entryName === "fixtures" && basename(parentDir) === "test";
+}
+
+export function isIgnored(scanRoot: string, skillMdPath: string, patterns: string[]): boolean {
+  if (patterns.length === 0) return false;
+  const rel = toPosix(relative(scanRoot, skillMdPath));
+  return patterns.some((pattern) => matchIgnore(rel, pattern));
+}
+
+function matchIgnore(relPosix: string, pattern: string): boolean {
+  const normalized = pattern.replaceAll("\\", "/").replace(/^\.\//, "").replace(/\/$/, "");
+  if (!normalized.includes("*")) {
+    return relPosix === normalized || relPosix.startsWith(`${normalized}/`);
+  }
+  const regex = new RegExp(
+    `^${normalized
+      .split("/")
+      .map((part) => {
+        if (part === "**") return ".*";
+        return part.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*");
+      })
+      .join("/")}$`,
+  );
+  return regex.test(relPosix) || regex.test(relPosix.split("/").slice(0, -1).join("/"));
 }

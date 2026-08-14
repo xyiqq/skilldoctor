@@ -1,4 +1,5 @@
 import { color } from "./color.js";
+import { formatSarif } from "./sarif.js";
 import type { CliOptions, Finding, Report, SkillReport } from "./types.js";
 
 export function emptyReport(command: string): Report {
@@ -36,6 +37,9 @@ export function shouldFail(report: Report, failOn: CliOptions["failOn"]): boolea
 export function formatReport(report: Report, options: CliOptions): string {
   if (options.format === "json") {
     return `${JSON.stringify(report, null, 2)}\n`;
+  }
+  if (options.format === "sarif") {
+    return formatSarif(report);
   }
   if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
     return "";

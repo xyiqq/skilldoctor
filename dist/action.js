@@ -4,7 +4,7 @@ import { formatReport, shouldFail } from "./report.js";
 const path = process.env.INPUT_PATH || ".";
 const failOn = parseFailOn(process.env.INPUT_FAIL_ON);
 const report = runCi(path);
-process.stdout.write(formatReport(report, { format: "human", failOn, quiet: false }));
+process.stdout.write(formatReport(report, { format: "human", failOn, quiet: false, ignore: [] }));
 emitGitHubAnnotations(report);
 if (process.env.GITHUB_OUTPUT) {
     const { appendFileSync } = await import("node:fs");
