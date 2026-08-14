@@ -26,7 +26,7 @@ program
   .command("scan")
   .alias("doctor")
   .description("Scan skills installed for local agents")
-  .option("--format <format>", "human or json", "human")
+  .option("--format <format>", "human, json, or sarif", "human")
   .option("--fail-on <level>", "error, warning, or never", "error")
   .option("--quiet", "print nothing on success", false)
   .action((opts) => {
@@ -59,28 +59,35 @@ program.parse();
 function addPathCommand(
   command: Command,
   description: string,
-  runner: (path: string) => Report,
+  runner: (path: string, ignore?: string[]) => Report,
 ): void {
   command
     .description(description)
     .argument("[path]", "skill directory or repository root", ".")
-    .option("--format <format>", "human or json", "human")
+    .option("--format <format>", "human, json, or sarif", "human")
     .option("--fail-on <level>", "error, warning, or never", "error")
+    .option("--ignore <pattern>", "skip matching skill paths (repeatable)", collectIgnore, [])
     .option("--quiet", "print nothing on success", false)
     .action((path: string, opts: Record<string, unknown>) => {
       const options = readOptions(opts);
-      const report = runner(path);
+      const report = runner(path, options.ignore);
       exitWith(report, options);
     });
 }
 
+function collectIgnore(value: string, previous: string[]): string[] {
+  return [...previous, value];
+}
+
 function readOptions(opts: Record<string, unknown>): CliOptions {
-  const format = opts.format === "json" ? "json" : "human";
+  const format = opts.format === "json" || opts.format === "sarif" ? opts.format : "human";
   const failOn = parseFailOn(opts.failOn);
+  const ignore = Array.isArray(opts.ignore) ? opts.ignore.filter((item): item is string => typeof item === "string") : [];
   return {
     format: format as Format,
     failOn,
     quiet: Boolean(opts.quiet),
+    ignore,
   };
 }
 

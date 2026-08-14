@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- Add `--format sarif` for GitHub code scanning. / 新增 `--format sarif`，方便接入 GitHub code scanning。
+- Add repeatable `--ignore <pattern>` to skip skill paths. / 新增可重复的 `--ignore`，跳过指定 Skill 路径。
+- Warn when `scan` finds a Windows symlink install. / `scan` 发现 Windows 符号链接安装时给出警告。
+
 ## 0.1.1
 
 - Add `skilldoctor rules` to print stable rule IDs. / 新增 `skilldoctor rules`，列出稳定规则 ID。

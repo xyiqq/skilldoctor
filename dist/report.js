@@ -1,4 +1,5 @@
 import { color } from "./color.js";
+import { formatSarif } from "./sarif.js";
 export function emptyReport(command) {
     return {
         ok: true,
@@ -36,6 +37,9 @@ export function shouldFail(report, failOn) {
 export function formatReport(report, options) {
     if (options.format === "json") {
         return `${JSON.stringify(report, null, 2)}\n`;
+    }
+    if (options.format === "sarif") {
+        return formatSarif(report);
     }
     if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
         return "";

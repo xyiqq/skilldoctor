@@ -21,7 +21,7 @@ program
     .command("scan")
     .alias("doctor")
     .description("Scan skills installed for local agents")
-    .option("--format <format>", "human or json", "human")
+    .option("--format <format>", "human, json, or sarif", "human")
     .option("--fail-on <level>", "error, warning, or never", "error")
     .option("--quiet", "print nothing on success", false)
     .action((opts) => {
@@ -52,22 +52,28 @@ function addPathCommand(command, description, runner) {
     command
         .description(description)
         .argument("[path]", "skill directory or repository root", ".")
-        .option("--format <format>", "human or json", "human")
+        .option("--format <format>", "human, json, or sarif", "human")
         .option("--fail-on <level>", "error, warning, or never", "error")
+        .option("--ignore <pattern>", "skip matching skill paths (repeatable)", collectIgnore, [])
         .option("--quiet", "print nothing on success", false)
         .action((path, opts) => {
         const options = readOptions(opts);
-        const report = runner(path);
+        const report = runner(path, options.ignore);
         exitWith(report, options);
     });
 }
+function collectIgnore(value, previous) {
+    return [...previous, value];
+}
 function readOptions(opts) {
-    const format = opts.format === "json" ? "json" : "human";
+    const format = opts.format === "json" || opts.format === "sarif" ? opts.format : "human";
     const failOn = parseFailOn(opts.failOn);
+    const ignore = Array.isArray(opts.ignore) ? opts.ignore.filter((item) => typeof item === "string") : [];
     return {
         format: format,
         failOn,
         quiet: Boolean(opts.quiet),
+        ignore,
     };
 }
 function parseFailOn(value) {

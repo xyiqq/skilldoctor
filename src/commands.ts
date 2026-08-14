@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { lstatSync, mkdirSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join, resolve } from "node:path";
 import { discoverInstalledSkills, discoverSkills, skillDisplayName } from "./discover.js";
@@ -6,20 +6,20 @@ import { emptyReport, finalizeReport } from "./report.js";
 import { allChecks, auditSkill, compatSkill, lintSkill } from "./run.js";
 import type { Report, SkillDocument } from "./types.js";
 
-export function runLint(path: string): Report {
-  return collect("lint", path, lintSkill);
+export function runLint(path: string, ignore: string[] = []): Report {
+  return collect("lint", path, lintSkill, ignore);
 }
 
-export function runAudit(path: string): Report {
-  return collect("audit", path, auditSkill);
+export function runAudit(path: string, ignore: string[] = []): Report {
+  return collect("audit", path, auditSkill, ignore);
 }
 
-export function runCompat(path: string): Report {
-  return collect("compat", path, compatSkill);
+export function runCompat(path: string, ignore: string[] = []): Report {
+  return collect("compat", path, compatSkill, ignore);
 }
 
-export function runCi(path: string): Report {
-  return collect("ci", path, allChecks);
+export function runCi(path: string, ignore: string[] = []): Report {
+  return collect("ci", path, allChecks, ignore);
 }
 
 export function runScan(cwd = process.cwd()): Report {
@@ -39,7 +39,17 @@ export function runScan(cwd = process.cwd()): Report {
       ...(report.extra ?? {}),
       location: agentRoot,
       hash: hashSkill(skill),
+      symlink: isSymlink(skill.root),
     };
+    if (report.extra.symlink && process.platform === "win32") {
+      report.findings.push({
+        rule: "scan/windows-symlink",
+        severity: "warning",
+        message: "skill is installed as a symlink; Windows agents often fail to follow these",
+        file: "SKILL.md",
+        hint: "Copy the skill directory instead of symlinking it on Windows.",
+      });
+    }
     return report;
   });
 
@@ -80,12 +90,21 @@ function collect(
   command: string,
   path: string,
   toReport: (skill: SkillDocument) => ReturnType<typeof lintSkill>,
+  ignore: string[] = [],
 ): Report {
-  const skills = discoverSkills(path);
+  const skills = discoverSkills(path, 8, ignore);
   if (skills.length === 0) {
     return emptyReport(command);
   }
   return finalizeReport(command, skills.map(toReport));
+}
+
+function isSymlink(path: string): boolean {
+  try {
+    return lstatSync(path).isSymbolicLink();
+  } catch {
+    return false;
+  }
 }
 
 function hashSkill(skill: SkillDocument): string {

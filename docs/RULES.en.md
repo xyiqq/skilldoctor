@@ -53,3 +53,4 @@ Stable identifiers. Command flags and file paths stay in English.
 | ID | Severity | Meaning |
 |---|---|---|
 | `scan/duplicate-name` | warning | Same skill name is installed in more than one agent directory |
+| `scan/windows-symlink` | warning | Skill is installed as a symlink on Windows |
