@@ -3,6 +3,7 @@ export declare function emptyReport(command: string): Report;
 export declare function finalizeReport(command: string, skills: SkillReport[]): Report;
 export declare function shouldFail(report: Report, failOn: CliOptions["failOn"]): boolean;
 export declare function formatReport(report: Report, options: CliOptions): string;
+export declare function formatMarkdown(report: Report): string;
 export declare function countBySeverity(findings: Finding[]): {
     errors: number;
     warnings: number;

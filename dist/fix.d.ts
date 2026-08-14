@@ -3,7 +3,7 @@ export interface FixResult {
     path: string;
     changes: string[];
 }
-export declare function runFix(inputPath: string, ignore?: string[]): FixResult[];
+export declare function runFix(inputPath: string, ignore?: string[], dryRun?: boolean): FixResult[];
 export declare function fixSkillText(skill: SkillDocument): {
     next: string;
     changes: string[];

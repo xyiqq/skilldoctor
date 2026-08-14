@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+- Add `skilldoctor score` with 0-100 grades and optional `--fail-on score:<n>`. / 新增 `score` 评分命令。
+- Add `--format markdown` for PR-friendly reports. / 新增 markdown 报告格式，方便贴到 PR。
+- Add `fix --dry-run` to preview safe auto-fixes. / `fix` 支持 `--dry-run`。
+- Add `audit/insecure-http` for plain HTTP downloads. / 新增明文 HTTP 下载审计规则。
+
 ## 0.2.1
 
 - Fix `.skilldoctor.json` wiping `.skilldoctorignore` when `ignore` is omitted. / 修复 JSON 未写 `ignore` 时清空 ignore 文件的问题。

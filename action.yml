@@ -18,7 +18,7 @@ inputs:
     required: false
     default: ""
   format:
-    description: Report format (human, json, or sarif)
+    description: Report format (human, json, sarif, or markdown)
     required: false
     default: human
   output:
