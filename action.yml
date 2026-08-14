@@ -13,6 +13,18 @@ inputs:
     description: Fail the job on error, warning, or never
     required: false
     default: error
+  ignore:
+    description: Comma-separated skill path prefixes to skip
+    required: false
+    default: ""
+  format:
+    description: Report format (human, json, or sarif)
+    required: false
+    default: human
+  output:
+    description: Optional file path to write the report
+    required: false
+    default: ""
 outputs:
   errors:
     description: Number of error findings
