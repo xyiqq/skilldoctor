@@ -13,7 +13,14 @@ const SPEC_FIELDS = new Set([
 const VAGUE_DESCRIPTIONS = /^(helps? with|utility|helper|tools?|misc|stuff|various)\b/i;
 const FIRST_PERSON = /^(i |i'm |i can |you can |use me\b)/i;
 const WHEN_HINT = /\b(use when|when the user|when working|triggers?|asks? for)\b/i;
-const RELATIVE_REF_RE = /(?:(?:\[[^\]]*\]\((?!https?:|mailto:|#)([^)]+)\))|(?:(?:scripts|references|assets)\/[A-Za-z0-9._/-]+))/g;
+// The bare-path alternative must not fire in the middle of a longer path: `~/.claude/scripts/x.sh`
+// and `../../tools/scripts/x.sh` name files OUTSIDE the skill, but the substring `scripts/x.sh`
+// looks skill-relative and used to be reported as a broken reference.
+const RELATIVE_REF_RE = /(?:(?:\[[^\]]*\]\((?!https?:|mailto:|#)([^)]+)\))|(?:(?<![\w~.\-/\\])(?:scripts|references|assets)\/[A-Za-z0-9._/*?<>{}$-]+))/g;
+// A reference carrying a glob or a placeholder (`references/type-*.md`, `scripts/<name>.py`,
+// `assets/${theme}.css`) names a family of files, not one file — resolving it against the
+// filesystem produces a truncated path that never exists.
+const REF_PLACEHOLDER_RE = /[*<>{}$]/;
 export const lintRules = [
     {
         id: "lint/frontmatter-missing",
@@ -207,6 +214,12 @@ export const lintRules = [
                 const rawRef = (match[1] ?? match[0]).trim();
                 const cleaned = rawRef.replace(/^\.\//, "").split("#")[0]?.split("?")[0] ?? "";
                 if (!cleaned || cleaned.startsWith("/") || seen.has(cleaned))
+                    continue;
+                // Home-anchored (`~/...`), env-anchored (`$HOME/...`) and schemed refs point outside the
+                // skill directory; globs and placeholders point at no single file.
+                if (cleaned.startsWith("~") || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(cleaned))
+                    continue;
+                if (REF_PLACEHOLDER_RE.test(cleaned))
                     continue;
                 if (!/^(scripts|references|assets)\//.test(cleaned) && !match[1])
                     continue;

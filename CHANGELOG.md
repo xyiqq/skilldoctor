@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Scan skills installed as symlinks instead of skipping them without a warning. / 支持以符号链接安装的 Skill，不再静默跳过。
+- Resolve a symlinked skill's own relative references against its real directory. / 符号链接 Skill 的相对引用按真实目录解析。
+- Stop reporting `~/...`, `$HOME/...`, sibling (`../../`) and glob-shaped paths as broken skill-relative references. / 不再把 `~/...`、`$HOME/...`、上级目录和通配符路径当作 Skill 内的失效引用。
+
 ## 0.2.2
 
 - Add `skilldoctor score` with 0-100 grades and optional `--fail-on score:<n>`. / 新增 `score` 评分命令。
