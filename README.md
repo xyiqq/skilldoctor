@@ -41,6 +41,7 @@ npx --yes github:xyiqq/skilldoctor compat ./my-skill
 npx --yes github:xyiqq/skilldoctor ci ./my-skill
 npx --yes github:xyiqq/skilldoctor scan
 npx --yes github:xyiqq/skilldoctor init pdf-processing
+npx --yes github:xyiqq/skilldoctor rules
 ```
 
 `scan` is also available as `skilldoctor doctor`.

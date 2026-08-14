@@ -31,6 +31,8 @@ export const PROJECT_SKILL_ROOTS = [
     ".claude/skills",
     ".opencode/skills",
     ".gemini/skills",
+    ".github/skills",
+    ".copilot/skills",
     "skills",
 ];
 export const HOME_SKILL_ROOTS = [
@@ -42,6 +44,7 @@ export const HOME_SKILL_ROOTS = [
     ".opencode/skills",
     ".openclaw/skills",
     ".gemini/skills",
+    ".copilot/skills",
 ];
 export function discoverSkills(inputPath, maxDepth = 8) {
     const target = resolve(inputPath);
@@ -74,7 +77,7 @@ function walkForSkillMd(dir, found, depth, maxDepth) {
         return;
     }
     for (const entry of entries) {
-        if (IGNORE_DIR_NAMES.has(entry.name))
+        if (IGNORE_DIR_NAMES.has(entry.name) || isTestFixtureDir(dir, entry.name))
             continue;
         const full = join(dir, entry.name);
         if (entry.isDirectory()) {
@@ -152,5 +155,8 @@ function extensionOf(name) {
 }
 function toPosix(value) {
     return value.split(sep).join("/");
+}
+function isTestFixtureDir(parentDir, entryName) {
+    return entryName === "fixtures" && basename(parentDir) === "test";
 }
 //# sourceMappingURL=discover.js.map

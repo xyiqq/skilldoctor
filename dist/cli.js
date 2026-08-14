@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runAudit, runCi, runCompat, runInit, runLint, runScan } from "./commands.js";
+import { formatRuleCatalog } from "./catalog.js";
 import { emitGitHubAnnotations } from "./github.js";
 import { formatReport, shouldFail } from "./report.js";
 const program = new Command();
@@ -39,6 +40,12 @@ program
         process.stderr.write(`${error instanceof Error ? error.message : error}\n`);
         process.exitCode = 1;
     }
+});
+program
+    .command("rules")
+    .description("List built-in lint, audit, compat, and scan rule IDs")
+    .action(() => {
+    process.stdout.write(formatRuleCatalog());
 });
 program.parse();
 function addPathCommand(command, description, runner) {
