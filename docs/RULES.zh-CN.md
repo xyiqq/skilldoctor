@@ -39,6 +39,7 @@
 | `audit/self-modify` | warning | Skill 要求代理改写自身 |
 | `audit/obfuscated-code` | warning | `scripts/` 里动态解码或 `eval` |
 | `audit/dangerous-script` | error | 递归删除或下载后执行 |
+| `audit/insecure-http` | warning | 通过明文 HTTP 下载或安装 |
 
 ## compat
 
