@@ -33,6 +33,8 @@ export const PROJECT_SKILL_ROOTS = [
   ".claude/skills",
   ".opencode/skills",
   ".gemini/skills",
+  ".github/skills",
+  ".copilot/skills",
   "skills",
 ];
 
@@ -45,6 +47,7 @@ export const HOME_SKILL_ROOTS = [
   ".opencode/skills",
   ".openclaw/skills",
   ".gemini/skills",
+  ".copilot/skills",
 ];
 
 export function discoverSkills(inputPath: string, maxDepth = 8): SkillDocument[] {
@@ -82,7 +85,7 @@ function walkForSkillMd(dir: string, found: string[], depth: number, maxDepth: n
   }
 
   for (const entry of entries) {
-    if (IGNORE_DIR_NAMES.has(entry.name)) continue;
+    if (IGNORE_DIR_NAMES.has(entry.name) || isTestFixtureDir(dir, entry.name)) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
       walkForSkillMd(full, found, depth + 1, maxDepth);
@@ -170,4 +173,8 @@ function extensionOf(name: string): string {
 
 function toPosix(value: string): string {
   return value.split(sep).join("/");
+}
+
+function isTestFixtureDir(parentDir: string, entryName: string): boolean {
+  return entryName === "fixtures" && basename(parentDir) === "test";
 }

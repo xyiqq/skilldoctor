@@ -1,3 +1,4 @@
+export { formatRuleCatalog, RULE_CATALOG } from "./catalog.js";
 export { runAudit, runCi, runCompat, runInit, runLint, runScan } from "./commands.js";
 export { discoverSkills, findSkillMdFiles } from "./discover.js";
 export { loadSkill, parseSkillMd } from "./parse.js";
