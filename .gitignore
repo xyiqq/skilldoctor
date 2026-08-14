@@ -7,3 +7,4 @@ Thumbs.db
 .env.*
 !.env.example
 .skilldoctor-cache/
+local/
