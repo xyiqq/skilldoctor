@@ -23,6 +23,7 @@
 | `lint/nested-reference` | warning | 引用超过一层 |
 | `lint/windows-path` | warning | Skill 内路径使用了反斜杠 |
 | `lint/unknown-portable-field` | info | 字段不在核心规范里 |
+| `lint/duplicate-name` | warning | 同一次扫描里有两个 Skill 重名 |
 
 ## audit
 

@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/xyiqq/skilldoctor/actions/workflows/ci.yml/badge.svg)](https://github.com/xyiqq/skilldoctor/actions/workflows/ci.yml)
 
-Quality gate for [Agent Skills](https://agentskills.io). Lint the spec, audit unsafe instructions, and check whether a `SKILL.md` actually works on Claude Code, Cursor, Codex, and OpenCode.
+Quality gate for [Agent Skills](https://agentskills.io). Lint the spec, audit unsafe instructions, and check whether a `SKILL.md` actually works on Claude Code, Cursor, Codex, OpenCode, Gemini CLI, and GitHub Copilot.
 
-Agent Skills 的质量门禁：校验官方规范、审计危险指令，并检查同一个 `SKILL.md` 在 Claude Code、Cursor、Codex、OpenCode 上能不能移植。
+Agent Skills 的质量门禁：校验官方规范、审计危险指令，并检查同一个 `SKILL.md` 在 Claude Code、Cursor、Codex、OpenCode、Gemini CLI、GitHub Copilot 上能不能移植。
 
 Vercel `npx skills` installs skills. skilldoctor decides whether you should keep them.
 
@@ -42,6 +42,8 @@ npx --yes github:xyiqq/skilldoctor ci ./my-skill
 npx --yes github:xyiqq/skilldoctor scan
 npx --yes github:xyiqq/skilldoctor init pdf-processing
 npx --yes github:xyiqq/skilldoctor rules
+npx --yes github:xyiqq/skilldoctor explain lint/name-invalid
+npx --yes github:xyiqq/skilldoctor fix ./my-skill
 ```
 
 `scan` is also available as `skilldoctor doctor`.
@@ -63,6 +65,19 @@ npx --yes github:xyiqq/skilldoctor rules
 skilldoctor ci . --format json --fail-on warning
 skilldoctor ci . --ignore examples --format sarif
 ```
+
+Optional config files in the repo root / 仓库根目录可选配置：
+
+```json
+{
+  "failOn": "error",
+  "ignore": ["vendor/skills"]
+}
+```
+
+`.skilldoctorignore` uses one path prefix per line. `#` comments are skipped.
+
+`.skilldoctorignore` 每行一个路径前缀，`#` 开头是注释。
 
 ## Example / 示例
 

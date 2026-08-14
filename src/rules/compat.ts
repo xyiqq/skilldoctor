@@ -2,7 +2,7 @@ import { normalizeTools } from "./audit.js";
 import { findLine } from "../parse.js";
 import type { AgentId, Finding, Rule, RuleContext } from "../types.js";
 
-export const AGENTS: AgentId[] = ["claude", "cursor", "codex", "opencode"];
+export const AGENTS: AgentId[] = ["claude", "cursor", "codex", "opencode", "gemini", "copilot"];
 
 export const CORE_FIELDS = new Set([
   "name",
@@ -33,6 +33,8 @@ export const AGENT_FIELDS: Record<AgentId, Set<string>> = {
   ]),
   codex: new Set([...CORE_FIELDS, "skill_url"]),
   opencode: new Set(CORE_FIELDS),
+  gemini: new Set(CORE_FIELDS),
+  copilot: new Set([...CORE_FIELDS, "disable-model-invocation", "user-invocable"]),
 };
 
 export const AGENT_LABEL: Record<AgentId, string> = {
@@ -40,6 +42,8 @@ export const AGENT_LABEL: Record<AgentId, string> = {
   cursor: "Cursor",
   codex: "Codex",
   opencode: "OpenCode",
+  gemini: "Gemini CLI",
+  copilot: "GitHub Copilot",
 };
 
 export function supportedAgents(frontmatter: Record<string, unknown>): Record<AgentId, "yes" | "warn" | "no"> {
@@ -77,7 +81,7 @@ export const compatRules: Rule[] = [
           message: `frontmatter.${key} is not portable (supported: ${supported.join(", ")})`,
           file: "SKILL.md",
           line: findLine(skill.raw, new RegExp(`^${escapeRegExp(key)}\\s*:`, "m")),
-          hint: "Keep core behavior in the markdown body so Codex, Cursor, and OpenCode still work.",
+          hint: "Keep core behavior in the markdown body so Codex, Cursor, Gemini, Copilot, and OpenCode still work.",
         });
       }
       return findings;
@@ -93,7 +97,7 @@ export const compatRules: Rule[] = [
         findings.push({
           rule: "compat/unknown-field",
           severity: "info",
-          message: `frontmatter.${key} is not recognized by Claude, Cursor, Codex, or OpenCode`,
+          message: `frontmatter.${key} is not recognized by Claude, Cursor, Codex, OpenCode, Gemini, or Copilot`,
           file: "SKILL.md",
           line: findLine(skill.raw, new RegExp(`^${escapeRegExp(key)}\\s*:`, "m")),
         });

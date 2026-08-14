@@ -1,7 +1,7 @@
 import { RULE_CATALOG } from "./catalog.js";
 import type { Report } from "./types.js";
 
-export function formatSarif(report: Report, version = "0.1.2"): string {
+export function formatSarif(report: Report, version = "0.2.0"): string {
   const results = report.skills.flatMap((skill) =>
     skill.findings
       .filter((finding) => finding.severity !== "info")
