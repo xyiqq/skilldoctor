@@ -18,9 +18,11 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      - name: Smoke-test CLI on the example skill
+      - name: Smoke-test CLI
         run: |
+          node dist/cli.js rules
           node dist/cli.js lint examples
           node dist/cli.js audit examples
           node dist/cli.js compat examples
           node dist/cli.js ci examples
+          node dist/cli.js ci .
