@@ -167,8 +167,13 @@ export function isIgnored(scanRoot, skillMdPath, patterns) {
 }
 function matchIgnore(relPosix, pattern) {
     const normalized = pattern.replaceAll("\\", "/").replace(/^\.\//, "").replace(/\/$/, "");
+    const parent = relPosix.includes("/") ? relPosix.slice(0, relPosix.lastIndexOf("/")) : "";
     if (!normalized.includes("*")) {
-        return relPosix === normalized || relPosix.startsWith(`${normalized}/`);
+        return (relPosix === normalized ||
+            relPosix.startsWith(`${normalized}/`) ||
+            parent === normalized ||
+            parent.startsWith(`${normalized}/`) ||
+            basename(parent) === normalized);
     }
     const regex = new RegExp(`^${normalized
         .split("/")
@@ -178,6 +183,6 @@ function matchIgnore(relPosix, pattern) {
         return part.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*");
     })
         .join("/")}$`);
-    return regex.test(relPosix) || regex.test(relPosix.split("/").slice(0, -1).join("/"));
+    return regex.test(relPosix) || regex.test(parent);
 }
 //# sourceMappingURL=discover.js.map
