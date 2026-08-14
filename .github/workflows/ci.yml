@@ -26,3 +26,4 @@ jobs:
           node dist/cli.js compat examples
           node dist/cli.js ci examples
           node dist/cli.js ci .
+          node dist/cli.js explain lint/name-invalid

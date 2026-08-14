@@ -6,4 +6,5 @@ export interface RuleInfo {
 }
 export declare const RULE_CATALOG: RuleInfo[];
 export declare function formatRuleCatalog(): string;
+export declare function explainRule(id: string): string;
 //# sourceMappingURL=catalog.d.ts.map

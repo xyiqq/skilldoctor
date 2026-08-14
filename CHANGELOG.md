@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- Add `skilldoctor explain <rule>` and `skilldoctor fix`. / 新增规则说明和安全自动修复。
+- Read `.skilldoctor.json` and `.skilldoctorignore` from the scan root. / 支持配置文件和 ignore 文件。
+- Warn when two skills in the same scan share a name. / 同一次扫描里重名 Skill 会告警。
+- Expand the compat matrix with Gemini CLI and GitHub Copilot. / 兼容矩阵增加 Gemini 和 Copilot。
+- GitHub Action accepts `ignore`, `format`, and `output`. / Action 支持 ignore、format、output。
+
 ## 0.1.2
 
 - Add `--format sarif` for GitHub code scanning. / 新增 `--format sarif`，方便接入 GitHub code scanning。

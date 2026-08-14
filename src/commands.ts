@@ -7,7 +7,7 @@ import { allChecks, auditSkill, compatSkill, lintSkill } from "./run.js";
 import type { Report, SkillDocument } from "./types.js";
 
 export function runLint(path: string, ignore: string[] = []): Report {
-  return collect("lint", path, lintSkill, ignore);
+  return withDuplicateNames(collect("lint", path, lintSkill, ignore));
 }
 
 export function runAudit(path: string, ignore: string[] = []): Report {
@@ -19,7 +19,7 @@ export function runCompat(path: string, ignore: string[] = []): Report {
 }
 
 export function runCi(path: string, ignore: string[] = []): Report {
-  return collect("ci", path, allChecks, ignore);
+  return withDuplicateNames(collect("ci", path, allChecks, ignore));
 }
 
 export function runScan(cwd = process.cwd()): Report {
@@ -97,6 +97,27 @@ function collect(
     return emptyReport(command);
   }
   return finalizeReport(command, skills.map(toReport));
+}
+
+function withDuplicateNames(report: Report): Report {
+  const byName = new Map<string, string[]>();
+  for (const skill of report.skills) {
+    const paths = byName.get(skill.name) ?? [];
+    paths.push(skill.path);
+    byName.set(skill.name, paths);
+  }
+  for (const skill of report.skills) {
+    const paths = byName.get(skill.name) ?? [];
+    if (paths.length < 2) continue;
+    skill.findings.push({
+      rule: "lint/duplicate-name",
+      severity: "warning",
+      message: `skill name "${skill.name}" appears ${paths.length} times`,
+      file: "SKILL.md",
+      hint: paths.join(", "),
+    });
+  }
+  return finalizeReport(report.command, report.skills);
 }
 
 function isSymlink(path: string): boolean {

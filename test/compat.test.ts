@@ -13,6 +13,8 @@ describe("compat", () => {
     expect(matrix.cursor).toBe("yes");
     expect(matrix.codex).toBe("yes");
     expect(matrix.opencode).toBe("yes");
+    expect(matrix.gemini).toBe("yes");
+    expect(matrix.copilot).toBe("yes");
   });
 
   it("warns on Claude-only context fork", () => {
@@ -23,5 +25,7 @@ describe("compat", () => {
     const matrix = report.skills[0]?.extra?.matrix as Record<string, string>;
     expect(matrix.codex).toBe("warn");
     expect(matrix.opencode).toBe("warn");
+    expect(matrix.gemini).toBe("warn");
+    expect(matrix.copilot).toBe("warn");
   });
 });

@@ -1,7 +1,7 @@
 export type Severity = "error" | "warning" | "info";
 export type Format = "human" | "json" | "sarif";
 export type FailOn = "error" | "warning" | "never";
-export type AgentId = "claude" | "cursor" | "codex" | "opencode";
+export type AgentId = "claude" | "cursor" | "codex" | "opencode" | "gemini" | "copilot";
 export interface Finding {
     rule: string;
     severity: Severity;
