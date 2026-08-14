@@ -1,6 +1,6 @@
 import { normalizeTools } from "./audit.js";
 import { findLine } from "../parse.js";
-export const AGENTS = ["claude", "cursor", "codex", "opencode"];
+export const AGENTS = ["claude", "cursor", "codex", "opencode", "gemini", "copilot"];
 export const CORE_FIELDS = new Set([
     "name",
     "description",
@@ -29,12 +29,16 @@ export const AGENT_FIELDS = {
     ]),
     codex: new Set([...CORE_FIELDS, "skill_url"]),
     opencode: new Set(CORE_FIELDS),
+    gemini: new Set(CORE_FIELDS),
+    copilot: new Set([...CORE_FIELDS, "disable-model-invocation", "user-invocable"]),
 };
 export const AGENT_LABEL = {
     claude: "Claude Code",
     cursor: "Cursor",
     codex: "Codex",
     opencode: "OpenCode",
+    gemini: "Gemini CLI",
+    copilot: "GitHub Copilot",
 };
 export function supportedAgents(frontmatter) {
     const keys = Object.keys(frontmatter);
@@ -75,7 +79,7 @@ export const compatRules = [
                     message: `frontmatter.${key} is not portable (supported: ${supported.join(", ")})`,
                     file: "SKILL.md",
                     line: findLine(skill.raw, new RegExp(`^${escapeRegExp(key)}\\s*:`, "m")),
-                    hint: "Keep core behavior in the markdown body so Codex, Cursor, and OpenCode still work.",
+                    hint: "Keep core behavior in the markdown body so Codex, Cursor, Gemini, Copilot, and OpenCode still work.",
                 });
             }
             return findings;
@@ -92,7 +96,7 @@ export const compatRules = [
                 findings.push({
                     rule: "compat/unknown-field",
                     severity: "info",
-                    message: `frontmatter.${key} is not recognized by Claude, Cursor, Codex, or OpenCode`,
+                    message: `frontmatter.${key} is not recognized by Claude, Cursor, Codex, OpenCode, Gemini, or Copilot`,
                     file: "SKILL.md",
                     line: findLine(skill.raw, new RegExp(`^${escapeRegExp(key)}\\s*:`, "m")),
                 });

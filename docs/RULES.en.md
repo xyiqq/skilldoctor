@@ -23,6 +23,7 @@ Stable identifiers. Command flags and file paths stay in English.
 | `lint/nested-reference` | warning | Reference is more than one level deep |
 | `lint/windows-path` | warning | Backslashes in skill-relative paths |
 | `lint/unknown-portable-field` | info | Field is outside the core spec |
+| `lint/duplicate-name` | warning | Two skills in the same scan share a name |
 
 ## audit
 
