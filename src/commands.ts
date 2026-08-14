@@ -1,4 +1,4 @@
-import { lstatSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join, resolve } from "node:path";
 import { discoverInstalledSkills, discoverSkills, skillDisplayName } from "./discover.js";
@@ -74,9 +74,13 @@ export function runInit(name: string, cwd = process.cwd()): { path: string } {
   }
 
   const root = resolve(cwd, name);
+  const skillMd = join(root, "SKILL.md");
+  if (existsSync(skillMd)) {
+    throw new Error(`Refusing to overwrite existing skill at ${skillMd}`);
+  }
   mkdirSync(join(root, "references"), { recursive: true });
   mkdirSync(join(root, "scripts"), { recursive: true });
-  writeFileSync(join(root, "SKILL.md"), renderSkillTemplate(name), "utf8");
+  writeFileSync(skillMd, renderSkillTemplate(name), "utf8");
   writeFileSync(join(root, "references", "NOTES.md"), `# ${name} notes\n\nAdd long-form reference material here.\n`, "utf8");
   writeFileSync(
     join(root, "scripts", "hello.sh"),
@@ -109,6 +113,7 @@ function withDuplicateNames(report: Report): Report {
   for (const skill of report.skills) {
     const paths = byName.get(skill.name) ?? [];
     if (paths.length < 2) continue;
+    if (skill.findings.some((item) => item.rule === "lint/duplicate-name")) continue;
     skill.findings.push({
       rule: "lint/duplicate-name",
       severity: "warning",

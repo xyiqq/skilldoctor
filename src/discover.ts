@@ -187,8 +187,15 @@ export function isIgnored(scanRoot: string, skillMdPath: string, patterns: strin
 
 function matchIgnore(relPosix: string, pattern: string): boolean {
   const normalized = pattern.replaceAll("\\", "/").replace(/^\.\//, "").replace(/\/$/, "");
+  const parent = relPosix.includes("/") ? relPosix.slice(0, relPosix.lastIndexOf("/")) : "";
   if (!normalized.includes("*")) {
-    return relPosix === normalized || relPosix.startsWith(`${normalized}/`);
+    return (
+      relPosix === normalized ||
+      relPosix.startsWith(`${normalized}/`) ||
+      parent === normalized ||
+      parent.startsWith(`${normalized}/`) ||
+      basename(parent) === normalized
+    );
   }
   const regex = new RegExp(
     `^${normalized
@@ -199,5 +206,5 @@ function matchIgnore(relPosix: string, pattern: string): boolean {
       })
       .join("/")}$`,
   );
-  return regex.test(relPosix) || regex.test(relPosix.split("/").slice(0, -1).join("/"));
+  return regex.test(relPosix) || regex.test(parent);
 }

@@ -31,12 +31,17 @@ export function loadFileConfig(startPath) {
 function parseJsonConfig(file) {
     try {
         const raw = JSON.parse(readFileSync(file, "utf8"));
-        const ignore = Array.isArray(raw.ignore)
-            ? raw.ignore.filter((item) => typeof item === "string")
-            : [];
-        const failOn = raw.failOn === "error" || raw.failOn === "warning" || raw.failOn === "never" ? raw.failOn : undefined;
-        const format = raw.format === "human" || raw.format === "json" || raw.format === "sarif" ? raw.format : undefined;
-        return { ignore, failOn, format };
+        const result = {};
+        if (Array.isArray(raw.ignore)) {
+            result.ignore = raw.ignore.filter((item) => typeof item === "string");
+        }
+        if (raw.failOn === "error" || raw.failOn === "warning" || raw.failOn === "never") {
+            result.failOn = raw.failOn;
+        }
+        if (raw.format === "human" || raw.format === "json" || raw.format === "sarif") {
+            result.format = raw.format;
+        }
+        return result;
     }
     catch {
         return {};
