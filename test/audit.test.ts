@@ -42,4 +42,8 @@ describe("audit", () => {
   it("does not flag a do-not-commit .env warning", () => {
     expect(rules("audit-env-warning")).not.toContain("audit/credential-path");
   });
+
+  it("detects insecure HTTP downloads", () => {
+    expect(rules("audit-insecure-http")).toContain("audit/insecure-http");
+  });
 });

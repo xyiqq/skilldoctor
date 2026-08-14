@@ -30,7 +30,7 @@ function parseFailOn(value) {
     return "error";
 }
 function parseFormat(value) {
-    if (value === "json" || value === "sarif" || value === "human")
+    if (value === "json" || value === "sarif" || value === "markdown" || value === "human")
         return value;
     return "human";
 }

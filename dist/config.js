@@ -38,7 +38,7 @@ function parseJsonConfig(file) {
         if (raw.failOn === "error" || raw.failOn === "warning" || raw.failOn === "never") {
             result.failOn = raw.failOn;
         }
-        if (raw.format === "human" || raw.format === "json" || raw.format === "sarif") {
+        if (raw.format === "human" || raw.format === "json" || raw.format === "sarif" || raw.format === "markdown") {
             result.format = raw.format;
         }
         return result;

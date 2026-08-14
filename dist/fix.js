@@ -1,13 +1,14 @@
 import { writeFileSync } from "node:fs";
 import { discoverSkills } from "./discover.js";
-export function runFix(inputPath, ignore = []) {
+export function runFix(inputPath, ignore = [], dryRun = false) {
     const skills = discoverSkills(inputPath, 8, ignore);
     const results = [];
     for (const skill of skills) {
         const { next, changes } = fixSkillText(skill);
         if (changes.length === 0 || next === skill.raw)
             continue;
-        writeFileSync(skill.skillMdPath, next, "utf8");
+        if (!dryRun)
+            writeFileSync(skill.skillMdPath, next, "utf8");
         results.push({ path: skill.skillMdPath, changes });
     }
     return results;

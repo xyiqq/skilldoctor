@@ -83,6 +83,13 @@ const PATTERNS: PatternRule[] = [
     scriptsOnly: true,
     pattern: /\b(eval\s*\(|Function\s*\(|atob\s*\(|Buffer\.from\(\s*[^,]+,\s*['\"]base64['\"]|String\.fromCharCode\()/i,
   },
+  {
+    id: "audit/insecure-http",
+    severity: "warning",
+    message: "downloads or installs over plain HTTP",
+    hint: "Prefer HTTPS URLs for any remote fetch.",
+    pattern: /\b(curl|wget|fetch|Invoke-WebRequest|iwr)\b[^\n]{0,200}\bhttp:\/\/(?!localhost|127\.0\.0\.1|\[::1\])/i,
+  },
 ];
 
 const UNCONSTRAINED_TOOLS = /(^|[\s,])(\*|Bash|Bash\(\*\)|Bash\(\.\*\)|Shell)([\s,]|$)/;

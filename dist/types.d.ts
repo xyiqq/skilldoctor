@@ -1,5 +1,5 @@
 export type Severity = "error" | "warning" | "info";
-export type Format = "human" | "json" | "sarif";
+export type Format = "human" | "json" | "sarif" | "markdown";
 export type FailOn = "error" | "warning" | "never";
 export type AgentId = "claude" | "cursor" | "codex" | "opencode" | "gemini" | "copilot";
 export interface Finding {
