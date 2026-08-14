@@ -1,20 +1,20 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { lstatSync, mkdirSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join, resolve } from "node:path";
 import { discoverInstalledSkills, discoverSkills, skillDisplayName } from "./discover.js";
 import { emptyReport, finalizeReport } from "./report.js";
 import { allChecks, auditSkill, compatSkill, lintSkill } from "./run.js";
-export function runLint(path) {
-    return collect("lint", path, lintSkill);
+export function runLint(path, ignore = []) {
+    return collect("lint", path, lintSkill, ignore);
 }
-export function runAudit(path) {
-    return collect("audit", path, auditSkill);
+export function runAudit(path, ignore = []) {
+    return collect("audit", path, auditSkill, ignore);
 }
-export function runCompat(path) {
-    return collect("compat", path, compatSkill);
+export function runCompat(path, ignore = []) {
+    return collect("compat", path, compatSkill, ignore);
 }
-export function runCi(path) {
-    return collect("ci", path, allChecks);
+export function runCi(path, ignore = []) {
+    return collect("ci", path, allChecks, ignore);
 }
 export function runScan(cwd = process.cwd()) {
     const installed = discoverInstalledSkills(cwd);
@@ -32,7 +32,17 @@ export function runScan(cwd = process.cwd()) {
             ...(report.extra ?? {}),
             location: agentRoot,
             hash: hashSkill(skill),
+            symlink: isSymlink(skill.root),
         };
+        if (report.extra.symlink && process.platform === "win32") {
+            report.findings.push({
+                rule: "scan/windows-symlink",
+                severity: "warning",
+                message: "skill is installed as a symlink; Windows agents often fail to follow these",
+                file: "SKILL.md",
+                hint: "Copy the skill directory instead of symlinking it on Windows.",
+            });
+        }
         return report;
     });
     for (const report of reports) {
@@ -60,12 +70,20 @@ export function runInit(name, cwd = process.cwd()) {
     writeFileSync(join(root, "scripts", "hello.sh"), `#!/bin/sh\nset -eu\nprintf 'skilldoctor scaffold ok\\n'\n`, "utf8");
     return { path: root };
 }
-function collect(command, path, toReport) {
-    const skills = discoverSkills(path);
+function collect(command, path, toReport, ignore = []) {
+    const skills = discoverSkills(path, 8, ignore);
     if (skills.length === 0) {
         return emptyReport(command);
     }
     return finalizeReport(command, skills.map(toReport));
+}
+function isSymlink(path) {
+    try {
+        return lstatSync(path).isSymbolicLink();
+    }
+    catch {
+        return false;
+    }
 }
 function hashSkill(skill) {
     return createHash("sha256").update(skill.raw).digest("hex").slice(0, 12);

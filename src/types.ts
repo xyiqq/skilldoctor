@@ -1,5 +1,5 @@
 export type Severity = "error" | "warning" | "info";
-export type Format = "human" | "json";
+export type Format = "human" | "json" | "sarif";
 export type FailOn = "error" | "warning" | "never";
 export type AgentId = "claude" | "cursor" | "codex" | "opencode";
 
@@ -52,6 +52,7 @@ export interface CliOptions {
   format: Format;
   failOn: FailOn;
   quiet: boolean;
+  ignore: string[];
 }
 
 export interface RuleContext {

@@ -54,12 +54,14 @@ npx --yes github:xyiqq/skilldoctor rules
 
 | Flag | Values | Default |
 |---|---|---|
-| `--format` | `human`, `json` | `human` |
+| `--format` | `human`, `json`, `sarif` | `human` |
 | `--fail-on` | `error`, `warning`, `never` | `error` |
+| `--ignore` | glob or path prefix, repeatable | none |
 | `--quiet` |  | off |
 
 ```bash
 skilldoctor ci . --format json --fail-on warning
+skilldoctor ci . --ignore examples --format sarif
 ```
 
 ## Example / 示例
