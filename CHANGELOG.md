@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+- Fix `.skilldoctor.json` wiping `.skilldoctorignore` when `ignore` is omitted. / 修复 JSON 未写 `ignore` 时清空 ignore 文件的问题。
+- Fix GitHub annotations so `SKILL.md` findings resolve under the skill directory. / 修复 GitHub annotation 路径，相对文件会拼到 Skill 目录下。
+- Refuse `init` when `SKILL.md` already exists. / `init` 遇到已有 Skill 时拒绝覆盖。
+- Improve `--ignore` matching for directory basenames. / `--ignore` 支持按 Skill 目录名匹配。
+- Make `lint/duplicate-name` findings idempotent. / 重名告警不再重复叠加。
+- Load `.skilldoctor.json` for `scan` format/failOn. / `scan` 也会读取配置文件。
+
 ## 0.2.0
 
 - Add `skilldoctor explain <rule>` and `skilldoctor fix`. / 新增规则说明和安全自动修复。

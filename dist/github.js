@@ -1,3 +1,4 @@
+import { isAbsolute, join } from "node:path";
 export function emitGitHubAnnotations(report) {
     if (process.env.GITHUB_ACTIONS !== "true")
         return;
@@ -6,12 +7,19 @@ export function emitGitHubAnnotations(report) {
             if (finding.severity === "info")
                 continue;
             const level = finding.severity === "error" ? "error" : "warning";
-            const file = finding.file ?? skill.path;
+            const file = resolveFindingPath(skill.path, finding.file);
             const line = finding.line ?? 1;
             const message = escapeProperty(`${finding.rule}: ${finding.message}`);
             process.stdout.write(`::${level} file=${escapeProperty(file)},line=${line}::${message}\n`);
         }
     }
+}
+export function resolveFindingPath(skillPath, file) {
+    if (!file)
+        return skillPath;
+    if (isAbsolute(file) || file.includes(":") || file.startsWith("/"))
+        return file;
+    return join(skillPath, file);
 }
 function escapeProperty(value) {
     return value.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A").replace(/:/g, "%3A").replace(/,/g, "%2C");
