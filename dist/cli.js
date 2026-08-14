@@ -27,7 +27,8 @@ program
     .option("--fail-on <level>", "error, warning, or never", "error")
     .option("--quiet", "print nothing on success", false)
     .action((opts) => {
-    exitWith(runScan(process.cwd()), readOptions(opts));
+    const fileConfig = loadFileConfig(process.cwd());
+    exitWith(runScan(process.cwd()), readOptions(opts, fileConfig));
 });
 program
     .command("init")
