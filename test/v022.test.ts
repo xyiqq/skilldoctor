@@ -26,7 +26,7 @@ describe("v0.2.2 features", () => {
 
   it("emits markdown reports", () => {
     const report = runCi(join(fixtures, "invalid-name"));
-    const md = formatReport(report, { format: "markdown", failOn: "error", quiet: false, ignore: [] });
+    const md = formatReport(report, { format: "markdown", failOn: "error", quiet: false, ignore: [], suppress: [] });
     expect(md).toContain("## skilldoctor ci");
     expect(md).toContain("| Severity | Rule | Location | Message |");
     expect(md).toContain("lint/name-invalid");

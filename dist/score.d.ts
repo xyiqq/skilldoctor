@@ -14,7 +14,7 @@ export interface ScoreReport {
     average: number;
     grade: "A" | "B" | "C" | "D" | "F";
 }
-export declare function scoreSkill(skill: SkillDocument): SkillScore;
-export declare function runScore(path: string, ignore?: string[]): ScoreReport;
+export declare function scoreSkill(skill: SkillDocument, suppress?: string[]): SkillScore;
+export declare function runScore(path: string, ignore?: string[], suppress?: string[]): ScoreReport;
 export declare function formatScoreReport(report: ScoreReport): string;
 //# sourceMappingURL=score.d.ts.map

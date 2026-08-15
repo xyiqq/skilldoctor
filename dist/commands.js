@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, mkdirSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { join, resolve } from "node:path";
-import { discoverInstalledSkills, discoverSkills, skillDisplayName } from "./discover.js";
+import { dirname, join, resolve } from "node:path";
+import { discoverInstalledSkills, discoverSkills, isIgnored, skillDisplayName } from "./discover.js";
 import { emptyReport, finalizeReport } from "./report.js";
 import { allChecks, auditSkill, compatSkill, lintSkill } from "./run.js";
 export function runLint(path, ignore = []) {
@@ -16,8 +16,12 @@ export function runCompat(path, ignore = []) {
 export function runCi(path, ignore = []) {
     return withDuplicateNames(collect("ci", path, allChecks, ignore));
 }
-export function runScan(cwd = process.cwd()) {
-    const installed = discoverInstalledSkills(cwd);
+export function runScan(cwd = process.cwd(), ignore = []) {
+    const installed = discoverInstalledSkills(cwd).filter(({ skill }) => {
+        if (ignore.length === 0)
+            return true;
+        return !isIgnored(dirname(skill.root), skill.skillMdPath, ignore);
+    });
     if (installed.length === 0) {
         return emptyReport("scan");
     }

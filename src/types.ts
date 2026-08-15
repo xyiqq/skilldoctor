@@ -53,6 +53,7 @@ export interface CliOptions {
   failOn: FailOn;
   quiet: boolean;
   ignore: string[];
+  suppress: string[];
 }
 
 export interface RuleContext {

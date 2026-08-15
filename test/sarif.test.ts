@@ -16,7 +16,7 @@ describe("v0.1.2 ignore and sarif", () => {
   it("emits SARIF 2.1 results for findings", () => {
     const report = runCi(join(fixtures, "invalid-name"));
     const sarif = JSON.parse(
-      formatReport(report, { format: "sarif", failOn: "error", quiet: false, ignore: [] }),
+      formatReport(report, { format: "sarif", failOn: "error", quiet: false, ignore: [], suppress: [] }),
     );
     expect(sarif.version).toBe("2.1.0");
     expect(sarif.runs[0].results.length).toBeGreaterThan(0);
