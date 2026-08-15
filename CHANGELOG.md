@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+- Add `--suppress <rule>` and `.skilldoctor.json` `suppress` to hide known findings (supports `lint/*`). / 新增规则屏蔽，支持配置文件与 `lint/*` 通配。
+- Fix `score` so it honors `.skilldoctor.json` `failOn` / `format` when CLI flags are omitted. / 修复 `score` 未读取配置文件 failOn/format 的问题。
+- Fix `scan` / `doctor` so `--ignore` actually filters installed skills. / 修复 `scan` 缺少可用的 `--ignore`。
+
 ## 0.2.2
 
 - Add `skilldoctor score` with 0-100 grades and optional `--fail-on score:<n>`. / 新增 `score` 评分命令。

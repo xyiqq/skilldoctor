@@ -61,13 +61,16 @@ npx --yes github:xyiqq/skilldoctor score ./my-skill
 | `--format` | `human`, `json`, `sarif`, `markdown` | `human` |
 | `--fail-on` | `error`, `warning`, `never`, or `score:<n>` for `score` | `error` |
 | `--ignore` | glob or path prefix, repeatable | none |
+| `--suppress` | rule id or `lint/*` style prefix, repeatable | none |
 | `--quiet` |  | off |
 | `--dry-run` | with `fix` only | off |
 
 ```bash
 skilldoctor ci . --format json --fail-on warning
 skilldoctor ci . --ignore examples --format markdown
+skilldoctor ci . --suppress lint/description-vague --suppress compat/*
 skilldoctor score . --fail-on score:80
+skilldoctor scan --ignore keep-out
 ```
 
 Optional config files in the repo root / 仓库根目录可选配置：
@@ -75,13 +78,18 @@ Optional config files in the repo root / 仓库根目录可选配置：
 ```json
 {
   "failOn": "error",
-  "ignore": ["vendor/skills"]
+  "ignore": ["vendor/skills"],
+  "suppress": ["lint/description-vague", "compat/*"]
 }
 ```
 
 `.skilldoctorignore` uses one path prefix per line. `#` comments are skipped.
 
 `.skilldoctorignore` 每行一个路径前缀，`#` 开头是注释。
+
+`suppress` hides matching findings from reports, exit codes, scores, and GitHub annotations. Use it for gradual adoption, not to silence security errors forever.
+
+`suppress` 会从报告、退出码、评分和 GitHub annotation 里隐藏匹配规则。适合渐进接入，不要长期用来掩盖安全问题。
 
 ## Example / 示例
 
@@ -116,10 +124,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: xyiqq/skilldoctor@v0.1.0
+      - uses: xyiqq/skilldoctor@v0.2.3
         with:
           path: .
           fail-on: error
+          suppress: lint/description-vague
 ```
 
 Or run the CLI from this repository / 或者直接跑本仓库 CLI：

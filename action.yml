@@ -21,6 +21,10 @@ inputs:
     description: Report format (human, json, sarif, or markdown)
     required: false
     default: human
+  suppress:
+    description: Comma-separated rule IDs to hide (supports lint/* wildcards)
+    required: false
+    default: ""
   output:
     description: Optional file path to write the report
     required: false

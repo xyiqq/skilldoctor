@@ -1,9 +1,13 @@
 import { allChecks } from "./run.js";
+import { isSuppressed } from "./config.js";
 import { discoverSkills, skillDisplayName } from "./discover.js";
-export function scoreSkill(skill) {
+export function scoreSkill(skill, suppress = []) {
     const report = allChecks(skill);
+    const findings = suppress.length
+        ? report.findings.filter((finding) => !isSuppressed(finding.rule, suppress))
+        : report.findings;
     let score = 100;
-    for (const finding of report.findings) {
+    for (const finding of findings) {
         if (finding.severity === "error")
             score -= 18;
         else if (finding.severity === "warning")
@@ -12,9 +16,9 @@ export function scoreSkill(skill) {
             score -= 1;
     }
     score = Math.max(0, Math.min(100, score));
-    const errors = report.findings.filter((item) => item.severity === "error").length;
-    const warnings = report.findings.filter((item) => item.severity === "warning").length;
-    const info = report.findings.filter((item) => item.severity === "info").length;
+    const errors = findings.filter((item) => item.severity === "error").length;
+    const warnings = findings.filter((item) => item.severity === "warning").length;
+    const info = findings.filter((item) => item.severity === "info").length;
     return {
         name: skillDisplayName(skill),
         path: skill.root,
@@ -23,11 +27,11 @@ export function scoreSkill(skill) {
         errors,
         warnings,
         info,
-        findings: report.findings,
+        findings,
     };
 }
-export function runScore(path, ignore = []) {
-    const skills = discoverSkills(path, 8, ignore).map(scoreSkill);
+export function runScore(path, ignore = [], suppress = []) {
+    const skills = discoverSkills(path, 8, ignore).map((skill) => scoreSkill(skill, suppress));
     if (skills.length === 0) {
         return { skills: [], average: 0, grade: "F" };
     }
