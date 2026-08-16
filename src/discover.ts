@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync, type Dirent } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join, relative, resolve, sep } from "node:path";
 import { loadSkill } from "./parse.js";
@@ -51,7 +51,7 @@ export const HOME_SKILL_ROOTS = [
 ];
 
 export function discoverSkills(inputPath: string, maxDepth = 8, ignore: string[] = []): SkillDocument[] {
-  const target = resolve(inputPath);
+  const target = realPathKey(resolve(inputPath)) ?? resolve(inputPath);
   const skillFiles = findSkillMdFiles(target, maxDepth).filter((file) => !isIgnored(target, file, ignore));
   return skillFiles.map((file) => loadSkill(file));
 }
@@ -66,15 +66,52 @@ export function findSkillMdFiles(target: string, maxDepth = 8): string[] {
 
   const direct = join(target, "SKILL.md");
   if (existsSync(direct) && statSync(direct).isFile()) {
-    return [direct];
+    return [realPathKey(direct) ?? direct];
   }
 
   const found: string[] = [];
-  walkForSkillMd(target, found, 0, maxDepth);
-  return [...new Set(found)].sort();
+  walkForSkillMd(target, found, 0, maxDepth, new Set());
+  // Real paths, not link paths: a skill reached through a symlink must resolve its own relative
+  // references (`../../docs/x.md`) against the directory it actually lives in. Joining `..` onto
+  // the link path walks up the wrong tree and reports references that exist as missing.
+  return [...new Set(found.map((file) => realPathKey(file) ?? file))].sort();
 }
 
-function walkForSkillMd(dir: string, found: string[], depth: number, maxDepth: number): void {
+/**
+ * Resolve what a directory entry really is. `Dirent.isDirectory()` / `isFile()` are false for a
+ * symlink, so a skill installed as `~/.claude/skills/foo -> /elsewhere/foo` would otherwise be
+ * skipped silently — the scan reports fewer skills than exist and prints no warning at all.
+ */
+function entryKind(fullPath: string, entry: Dirent): "dir" | "file" | null {
+  if (entry.isDirectory()) return "dir";
+  if (entry.isFile()) return "file";
+  if (!entry.isSymbolicLink()) return null;
+  try {
+    const stats = statSync(fullPath);
+    if (stats.isDirectory()) return "dir";
+    if (stats.isFile()) return "file";
+  } catch {
+    // dangling symlink
+  }
+  return null;
+}
+
+/** Real path of a directory, used to stop symlink loops from recursing forever. */
+function realPathKey(fullPath: string): string | null {
+  try {
+    return realpathSync(fullPath);
+  } catch {
+    return null;
+  }
+}
+
+function walkForSkillMd(
+  dir: string,
+  found: string[],
+  depth: number,
+  maxDepth: number,
+  visited: Set<string>,
+): void {
   if (depth > maxDepth) return;
 
   let entries;
@@ -87,11 +124,17 @@ function walkForSkillMd(dir: string, found: string[], depth: number, maxDepth: n
   for (const entry of entries) {
     if (IGNORE_DIR_NAMES.has(entry.name) || isTestFixtureDir(dir, entry.name)) continue;
     const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      walkForSkillMd(full, found, depth + 1, maxDepth);
+    const kind = entryKind(full, entry);
+    if (kind === "dir") {
+      const key = realPathKey(full);
+      if (key) {
+        if (visited.has(key)) continue;
+        visited.add(key);
+      }
+      walkForSkillMd(full, found, depth + 1, maxDepth, visited);
       continue;
     }
-    if (entry.isFile() && entry.name === "SKILL.md") {
+    if (kind === "file" && entry.name === "SKILL.md") {
       found.push(full);
     }
   }
@@ -99,7 +142,7 @@ function walkForSkillMd(dir: string, found: string[], depth: number, maxDepth: n
 
 export function listSkillFiles(root: string): SkillFile[] {
   const files: SkillFile[] = [];
-  collectTextFiles(root, root, files, 0, 6);
+  collectTextFiles(root, root, files, 0, 6, new Set());
   return files;
 }
 
@@ -109,6 +152,7 @@ function collectTextFiles(
   files: SkillFile[],
   depth: number,
   maxDepth: number,
+  visited: Set<string>,
 ): void {
   if (depth > maxDepth) return;
   let entries;
@@ -121,11 +165,17 @@ function collectTextFiles(
   for (const entry of entries) {
     if (IGNORE_DIR_NAMES.has(entry.name)) continue;
     const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      collectTextFiles(root, full, files, depth + 1, maxDepth);
+    const kind = entryKind(full, entry);
+    if (kind === "dir") {
+      const key = realPathKey(full);
+      if (key) {
+        if (visited.has(key)) continue;
+        visited.add(key);
+      }
+      collectTextFiles(root, full, files, depth + 1, maxDepth, visited);
       continue;
     }
-    if (!entry.isFile()) continue;
+    if (kind !== "file") continue;
     const ext = extensionOf(entry.name);
     if (!TEXT_EXTENSIONS.has(ext) && entry.name !== "SKILL.md") continue;
     try {

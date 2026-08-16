@@ -1,1 +1,1 @@
-{"version":3,"file":"lint.d.ts","sourceRoot":"","sources":["../../src/rules/lint.ts"],"names":[],"mappings":"AAGA,OAAO,EAOL,KAAK,IAAI,EAEV,MAAM,aAAa,CAAC;AAiBrB,eAAO,MAAM,SAAS,EAAE,IAAI,EA0X3B,CAAC"}
+{"version":3,"file":"lint.d.ts","sourceRoot":"","sources":["../../src/rules/lint.ts"],"names":[],"mappings":"AAGA,OAAO,EAOL,KAAK,IAAI,EAEV,MAAM,aAAa,CAAC;AAyBrB,eAAO,MAAM,SAAS,EAAE,IAAI,EA8X3B,CAAC"}

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Scan skills installed as symlinks instead of skipping them without a warning. / 支持以符号链接安装的 Skill，不再静默跳过。
+- Resolve a symlinked skill's own relative references against its real directory. / 符号链接 Skill 的相对引用按真实目录解析。
+- Stop reporting `~/...`, `$HOME/...`, sibling (`../../`) and glob-shaped paths as broken skill-relative references. / 不再把 `~/...`、`$HOME/...`、上级目录和通配符路径当作 Skill 内的失效引用。
+
 ## 0.2.4
 
 - Add `--output <file>` to CLI commands (`lint` / `audit` / `compat` / `ci` / `scan` / `score`) so reports can be saved like the GitHub Action. / CLI 新增 `--output`，可把报告写到文件。
