@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 export function loadFileConfig(startPath) {
-    const config = { ignore: [] };
+    const config = { ignore: [], suppress: [] };
     let dir = resolve(startPath);
     try {
         if (existsSync(dir) && statSync(dir).isFile())
@@ -35,6 +35,9 @@ function parseJsonConfig(file) {
         if (Array.isArray(raw.ignore)) {
             result.ignore = raw.ignore.filter((item) => typeof item === "string");
         }
+        if (Array.isArray(raw.suppress)) {
+            result.suppress = raw.suppress.filter((item) => typeof item === "string");
+        }
         if (raw.failOn === "error" || raw.failOn === "warning" || raw.failOn === "never") {
             result.failOn = raw.failOn;
         }
@@ -55,5 +58,26 @@ function parseIgnoreFile(file) {
 }
 export function mergeIgnore(fileIgnore, cliIgnore) {
     return [...new Set([...fileIgnore, ...cliIgnore])];
+}
+export function mergeSuppress(fileSuppress, cliSuppress) {
+    return [...new Set([...fileSuppress, ...cliSuppress])];
+}
+export function isSuppressed(ruleId, patterns) {
+    if (patterns.length === 0)
+        return false;
+    return patterns.some((pattern) => matchSuppress(ruleId, pattern));
+}
+function matchSuppress(ruleId, pattern) {
+    const normalized = pattern.trim();
+    if (!normalized)
+        return false;
+    if (normalized.endsWith("/*")) {
+        const prefix = normalized.slice(0, -1);
+        return ruleId.startsWith(prefix);
+    }
+    if (normalized.endsWith("*") && !normalized.includes("/")) {
+        return ruleId.startsWith(normalized.slice(0, -1));
+    }
+    return ruleId === normalized;
 }
 //# sourceMappingURL=config.js.map

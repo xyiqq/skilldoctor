@@ -1,4 +1,5 @@
 import { color } from "./color.js";
+import { isSuppressed } from "./config.js";
 import { formatSarif } from "./sarif.js";
 import type { CliOptions, Finding, Report, SkillReport } from "./types.js";
 
@@ -28,6 +29,15 @@ export function finalizeReport(command: string, skills: SkillReport[]): Report {
   };
 }
 
+export function applySuppress(report: Report, suppress: string[]): Report {
+  if (suppress.length === 0) return report;
+  const skills = report.skills.map((skill) => ({
+    ...skill,
+    findings: skill.findings.filter((finding) => !isSuppressed(finding.rule, suppress)),
+  }));
+  return finalizeReport(report.command, skills);
+}
+
 export function shouldFail(report: Report, failOn: CliOptions["failOn"]): boolean {
   if (failOn === "never") return false;
   if (failOn === "warning") return report.summary.errors > 0 || report.summary.warnings > 0;
@@ -35,6 +45,9 @@ export function shouldFail(report: Report, failOn: CliOptions["failOn"]): boolea
 }
 
 export function formatReport(report: Report, options: CliOptions): string {
+  if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
+    return "";
+  }
   if (options.format === "json") {
     return `${JSON.stringify(report, null, 2)}\n`;
   }
@@ -43,9 +56,6 @@ export function formatReport(report: Report, options: CliOptions): string {
   }
   if (options.format === "markdown") {
     return formatMarkdown(report);
-  }
-  if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
-    return "";
   }
 
   const lines: string[] = [];

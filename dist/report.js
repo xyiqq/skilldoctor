@@ -1,4 +1,5 @@
 import { color } from "./color.js";
+import { isSuppressed } from "./config.js";
 import { formatSarif } from "./sarif.js";
 export function emptyReport(command) {
     return {
@@ -27,6 +28,15 @@ export function finalizeReport(command, skills) {
         summary,
     };
 }
+export function applySuppress(report, suppress) {
+    if (suppress.length === 0)
+        return report;
+    const skills = report.skills.map((skill) => ({
+        ...skill,
+        findings: skill.findings.filter((finding) => !isSuppressed(finding.rule, suppress)),
+    }));
+    return finalizeReport(report.command, skills);
+}
 export function shouldFail(report, failOn) {
     if (failOn === "never")
         return false;
@@ -35,6 +45,9 @@ export function shouldFail(report, failOn) {
     return report.summary.errors > 0;
 }
 export function formatReport(report, options) {
+    if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
+        return "";
+    }
     if (options.format === "json") {
         return `${JSON.stringify(report, null, 2)}\n`;
     }
@@ -43,9 +56,6 @@ export function formatReport(report, options) {
     }
     if (options.format === "markdown") {
         return formatMarkdown(report);
-    }
-    if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
-        return "";
     }
     const lines = [];
     lines.push(color.bold(`skilldoctor ${report.command}`) + color.dim(`  ${report.summary.skills} skill(s)`));

@@ -4,12 +4,13 @@ import type { FailOn, Format } from "./types.js";
 
 export interface FileConfig {
   ignore: string[];
+  suppress: string[];
   failOn?: FailOn;
   format?: Format;
 }
 
 export function loadFileConfig(startPath: string): FileConfig {
-  const config: FileConfig = { ignore: [] };
+  const config: FileConfig = { ignore: [], suppress: [] };
   let dir = resolve(startPath);
   try {
     if (existsSync(dir) && statSync(dir).isFile()) dir = dirname(dir);
@@ -42,6 +43,9 @@ function parseJsonConfig(file: string): Partial<FileConfig> {
     if (Array.isArray(raw.ignore)) {
       result.ignore = raw.ignore.filter((item): item is string => typeof item === "string");
     }
+    if (Array.isArray(raw.suppress)) {
+      result.suppress = raw.suppress.filter((item): item is string => typeof item === "string");
+    }
     if (raw.failOn === "error" || raw.failOn === "warning" || raw.failOn === "never") {
       result.failOn = raw.failOn;
     }
@@ -63,4 +67,26 @@ function parseIgnoreFile(file: string): string[] {
 
 export function mergeIgnore(fileIgnore: string[], cliIgnore: string[]): string[] {
   return [...new Set([...fileIgnore, ...cliIgnore])];
+}
+
+export function mergeSuppress(fileSuppress: string[], cliSuppress: string[]): string[] {
+  return [...new Set([...fileSuppress, ...cliSuppress])];
+}
+
+export function isSuppressed(ruleId: string, patterns: string[]): boolean {
+  if (patterns.length === 0) return false;
+  return patterns.some((pattern) => matchSuppress(ruleId, pattern));
+}
+
+function matchSuppress(ruleId: string, pattern: string): boolean {
+  const normalized = pattern.trim();
+  if (!normalized) return false;
+  if (normalized.endsWith("/*")) {
+    const prefix = normalized.slice(0, -1);
+    return ruleId.startsWith(prefix);
+  }
+  if (normalized.endsWith("*") && !normalized.includes("/")) {
+    return ruleId.startsWith(normalized.slice(0, -1));
+  }
+  return ruleId === normalized;
 }

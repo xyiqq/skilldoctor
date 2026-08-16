@@ -6,6 +6,18 @@
 - Resolve a symlinked skill's own relative references against its real directory. / 符号链接 Skill 的相对引用按真实目录解析。
 - Stop reporting `~/...`, `$HOME/...`, sibling (`../../`) and glob-shaped paths as broken skill-relative references. / 不再把 `~/...`、`$HOME/...`、上级目录和通配符路径当作 Skill 内的失效引用。
 
+## 0.2.4
+
+- Add `--output <file>` to CLI commands (`lint` / `audit` / `compat` / `ci` / `scan` / `score`) so reports can be saved like the GitHub Action. / CLI 新增 `--output`，可把报告写到文件。
+- Fix SARIF `tool.driver.version` so it tracks `package.json` instead of a stale hardcoded `0.2.2`. / 修复 SARIF 工具版本号写死为旧版本的问题。
+- Fix `--quiet` so it also suppresses `json` / `sarif` / `markdown` output on success (file `--output` still writes the full report). / 修复 `--quiet` 对非 human 格式无效的问题。
+
+## 0.2.3
+
+- Add `--suppress <rule>` and `.skilldoctor.json` `suppress` to hide known findings (supports `lint/*`). / 新增规则屏蔽，支持配置文件与 `lint/*` 通配。
+- Fix `score` so it honors `.skilldoctor.json` `failOn` / `format` when CLI flags are omitted. / 修复 `score` 未读取配置文件 failOn/format 的问题。
+- Fix `scan` / `doctor` so `--ignore` actually filters installed skills. / 修复 `scan` 缺少可用的 `--ignore`。
+
 ## 0.2.2
 
 - Add `skilldoctor score` with 0-100 grades and optional `--fail-on score:<n>`. / 新增 `score` 评分命令。

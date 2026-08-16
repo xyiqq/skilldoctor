@@ -1,21 +1,21 @@
 import { appendFileSync, writeFileSync } from "node:fs";
 import { runCi } from "./commands.js";
-import { loadFileConfig, mergeIgnore } from "./config.js";
+import { loadFileConfig, mergeIgnore, mergeSuppress } from "./config.js";
 import { emitGitHubAnnotations } from "./github.js";
-import { formatReport, shouldFail } from "./report.js";
+import { applySuppress, formatReport, shouldFail } from "./report.js";
 import type { FailOn, Format } from "./types.js";
 
 const path = process.env.INPUT_PATH || ".";
 const failOn = parseFailOn(process.env.INPUT_FAIL_ON);
 const format = parseFormat(process.env.INPUT_FORMAT);
 const output = process.env.INPUT_OUTPUT?.trim();
-const cliIgnore = (process.env.INPUT_IGNORE || "")
-  .split(/[, \n]/)
-  .map((item) => item.trim())
-  .filter(Boolean);
-const ignore = mergeIgnore(loadFileConfig(path).ignore, cliIgnore);
-const report = runCi(path, ignore);
-const rendered = formatReport(report, { format, failOn, quiet: false, ignore });
+const fileConfig = loadFileConfig(path);
+const cliIgnore = splitList(process.env.INPUT_IGNORE);
+const cliSuppress = splitList(process.env.INPUT_SUPPRESS);
+const ignore = mergeIgnore(fileConfig.ignore, cliIgnore);
+const suppress = mergeSuppress(fileConfig.suppress, cliSuppress);
+const report = applySuppress(runCi(path, ignore), suppress);
+const rendered = formatReport(report, { format, failOn, quiet: false, ignore, suppress });
 
 process.stdout.write(rendered);
 emitGitHubAnnotations(report);
@@ -30,6 +30,13 @@ if (process.env.GITHUB_OUTPUT) {
 
 if (report.skills.length === 0 || shouldFail(report, failOn)) {
   process.exit(1);
+}
+
+function splitList(value: string | undefined): string[] {
+  return (value || "")
+    .split(/[, \n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function parseFailOn(value: string | undefined): FailOn {
