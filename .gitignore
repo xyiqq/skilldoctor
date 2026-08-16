@@ -8,3 +8,9 @@ Thumbs.db
 !.env.example
 .skilldoctor-cache/
 local/
+
+# local application drafts (do not publish)
+APPLY.zh-CN.md
+APPLY.zh-CN.html
+/APPLY*.md
+/APPLY*.html
