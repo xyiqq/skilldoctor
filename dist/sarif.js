@@ -1,5 +1,6 @@
 import { RULE_CATALOG } from "./catalog.js";
-export function formatSarif(report, version = "0.2.2") {
+import { packageVersion } from "./package.js";
+export function formatSarif(report, version = packageVersion()) {
     const results = report.skills.flatMap((skill) => skill.findings
         .filter((finding) => finding.severity !== "info")
         .map((finding) => ({

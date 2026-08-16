@@ -45,6 +45,9 @@ export function shouldFail(report, failOn) {
     return report.summary.errors > 0;
 }
 export function formatReport(report, options) {
+    if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
+        return "";
+    }
     if (options.format === "json") {
         return `${JSON.stringify(report, null, 2)}\n`;
     }
@@ -53,9 +56,6 @@ export function formatReport(report, options) {
     }
     if (options.format === "markdown") {
         return formatMarkdown(report);
-    }
-    if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
-        return "";
     }
     const lines = [];
     lines.push(color.bold(`skilldoctor ${report.command}`) + color.dim(`  ${report.summary.skills} skill(s)`));
