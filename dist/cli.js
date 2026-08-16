@@ -1,21 +1,20 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { writeFileSync } from "node:fs";
 import { runAudit, runCi, runCompat, runInit, runLint, runScan } from "./commands.js";
 import { explainRule, formatRuleCatalog } from "./catalog.js";
 import { loadFileConfig, mergeIgnore, mergeSuppress, } from "./config.js";
 import { runFix } from "./fix.js";
 import { emitGitHubAnnotations } from "./github.js";
+import { packageVersion } from "./package.js";
 import { applySuppress, formatReport, shouldFail } from "./report.js";
 import { formatScoreReport, runScore } from "./score.js";
 const program = new Command();
-const pkg = readPackage();
+const version = packageVersion();
 program
     .name("skilldoctor")
     .description("Quality gate for Agent Skills: lint, audit, and cross-agent compatibility.")
-    .version(pkg.version);
+    .version(version);
 addPathCommand(program.command("lint"), "Validate SKILL.md against the Agent Skills spec", runLint);
 addPathCommand(program.command("audit"), "Scan a skill for prompt injection, secrets, and unsafe tools", runAudit);
 addPathCommand(program.command("compat"), "Check Claude / Cursor / Codex / OpenCode / Gemini / Copilot portability", runCompat);
@@ -28,6 +27,7 @@ program
     .option("--fail-on <level>", "error, warning, or never", "error")
     .option("--ignore <pattern>", "skip matching skill paths (repeatable)", collectList, [])
     .option("--suppress <rule>", "hide matching rule IDs (repeatable, supports lint/*)", collectList, [])
+    .option("--output <file>", "write the report to a file")
     .option("--quiet", "print nothing on success", false)
     .action((opts) => {
     const fileConfig = loadFileConfig(process.cwd());
@@ -93,6 +93,7 @@ program
     .option("--suppress <rule>", "hide matching rule IDs (repeatable, supports lint/*)", collectList, [])
     .option("--format <format>", "human or json", "human")
     .option("--fail-on <level>", "error, warning, never, or score:<n>", "error")
+    .option("--output <file>", "write the report to a file")
     .action((path, opts) => {
     const fileConfig = loadFileConfig(path);
     const ignore = mergeIgnore(fileConfig.ignore, asStringList(opts.ignore));
@@ -107,12 +108,11 @@ program
             : opts.format === "json"
                 ? "json"
                 : "human";
-    if (format === "json") {
-        process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-    }
-    else {
-        process.stdout.write(formatScoreReport(report));
-    }
+    const rendered = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : formatScoreReport(report);
+    process.stdout.write(rendered);
+    const output = typeof opts.output === "string" ? opts.output.trim() : "";
+    if (output)
+        writeFileSync(output, rendered, "utf8");
     if (report.skills.length === 0) {
         process.exitCode = 1;
         return;
@@ -150,6 +150,7 @@ function addPathCommand(command, description, runner) {
         .option("--fail-on <level>", "error, warning, or never", "error")
         .option("--ignore <pattern>", "skip matching skill paths (repeatable)", collectList, [])
         .option("--suppress <rule>", "hide matching rule IDs (repeatable, supports lint/*)", collectList, [])
+        .option("--output <file>", "write the report to a file")
         .option("--quiet", "print nothing on success", false)
         .action((path, opts) => {
         const fileConfig = loadFileConfig(path);
@@ -171,12 +172,14 @@ function readOptions(opts, fileConfig = { ignore: [], suppress: [] }) {
     const failOn = process.argv.includes("--fail-on")
         ? parseFailOn(opts.failOn)
         : (fileConfig.failOn ?? parseFailOn(opts.failOn));
+    const output = typeof opts.output === "string" && opts.output.trim() ? opts.output.trim() : undefined;
     return {
         format,
         failOn,
         quiet: Boolean(opts.quiet),
         ignore: mergeIgnore(fileConfig.ignore, asStringList(opts.ignore)),
         suppress: mergeSuppress(fileConfig.suppress, asStringList(opts.suppress)),
+        output,
     };
 }
 function parseFormat(value) {
@@ -191,25 +194,15 @@ function parseFailOn(value) {
 }
 function exitWith(report, options) {
     const filtered = applySuppress(report, options.suppress);
+    const forFile = formatReport(filtered, { ...options, quiet: false });
     process.stdout.write(formatReport(filtered, options));
+    if (options.output)
+        writeFileSync(options.output, forFile, "utf8");
     emitGitHubAnnotations(filtered);
     if (filtered.skills.length === 0 && filtered.command !== "scan") {
         process.exitCode = 1;
         return;
     }
     process.exitCode = shouldFail(filtered, options.failOn) ? 1 : 0;
-}
-function readPackage() {
-    const here = dirname(fileURLToPath(import.meta.url));
-    const candidates = [join(here, "../package.json"), join(here, "../../package.json")];
-    for (const file of candidates) {
-        try {
-            return JSON.parse(readFileSync(file, "utf8"));
-        }
-        catch {
-            // try next
-        }
-    }
-    return { version: "0.0.0" };
 }
 //# sourceMappingURL=cli.js.map

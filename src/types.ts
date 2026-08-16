@@ -54,6 +54,7 @@ export interface CliOptions {
   quiet: boolean;
   ignore: string[];
   suppress: string[];
+  output?: string;
 }
 
 export interface RuleContext {

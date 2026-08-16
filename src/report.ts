@@ -45,6 +45,9 @@ export function shouldFail(report: Report, failOn: CliOptions["failOn"]): boolea
 }
 
 export function formatReport(report: Report, options: CliOptions): string {
+  if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
+    return "";
+  }
   if (options.format === "json") {
     return `${JSON.stringify(report, null, 2)}\n`;
   }
@@ -53,9 +56,6 @@ export function formatReport(report: Report, options: CliOptions): string {
   }
   if (options.format === "markdown") {
     return formatMarkdown(report);
-  }
-  if (options.quiet && report.ok && !shouldFail(report, options.failOn)) {
-    return "";
   }
 
   const lines: string[] = [];

@@ -62,6 +62,7 @@ npx --yes github:xyiqq/skilldoctor score ./my-skill
 | `--fail-on` | `error`, `warning`, `never`, or `score:<n>` for `score` | `error` |
 | `--ignore` | glob or path prefix, repeatable | none |
 | `--suppress` | rule id or `lint/*` style prefix, repeatable | none |
+| `--output` | file path to write the report | none |
 | `--quiet` |  | off |
 | `--dry-run` | with `fix` only | off |
 
@@ -69,6 +70,7 @@ npx --yes github:xyiqq/skilldoctor score ./my-skill
 skilldoctor ci . --format json --fail-on warning
 skilldoctor ci . --ignore examples --format markdown
 skilldoctor ci . --suppress lint/description-vague --suppress compat/*
+skilldoctor ci . --format markdown --output skilldoctor-report.md
 skilldoctor score . --fail-on score:80
 skilldoctor scan --ignore keep-out
 ```
@@ -124,11 +126,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: xyiqq/skilldoctor@v0.2.3
+      - uses: xyiqq/skilldoctor@v0.2.4
         with:
           path: .
           fail-on: error
           suppress: lint/description-vague
+          output: skilldoctor-report.md
 ```
 
 Or run the CLI from this repository / 或者直接跑本仓库 CLI：
